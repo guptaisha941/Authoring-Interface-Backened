@@ -1,5 +1,6 @@
-import pymysql
 import json
+import pymysql
+import requests
 from app import app
 from author import app
 from discourse import app
@@ -10,10 +11,12 @@ from flask import flash, request
 cursor = None
 conn = mysql.connect()
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS usr (author_id int,  discourse_id int, sentence_id int ,USR_ID int NOT NULL AUTO_INCREMENT, orignal_USR_json json,final_USR json,create_date datetime default now(),USR_status varchar(255),FOREIGN KEY (sentence_id) REFERENCES discourse (discourse_id) ,FOREIGN KEY (discourse_id) REFERENCES discourse(discourse_id),FOREIGN KEY (author_id) REFERENCES author(author_id), PRIMARY KEY (USR_ID))")
+cursor.execute("CREATE TABLE IF NOT EXISTS usr (author_id int,  discourse_id int, sentence_id int ,USR_ID int NOT NULL AUTO_INCREMENT, orignal_USR_json JSON,final_USR json,create_date datetime default now(),USR_status varchar(255),FOREIGN KEY (sentence_id) REFERENCES discourse (discourse_id) ,FOREIGN KEY (discourse_id) REFERENCES discourse(discourse_id),FOREIGN KEY (author_id) REFERENCES author(author_id), PRIMARY KEY (USR_ID))")
+
 conn.commit()
 cursor.close()
 conn.close()
+
 
 @app.route('/USR/create', methods = ['POST'])
 def create_USR():
@@ -29,7 +32,8 @@ def create_USR():
         _USR_status = _json['USR_status']
         if _author_id and _discourse_id and _sentence_id and _orignal_USR_json and _final_USR and _USR_status and request.method == 'POST':
             conn = mysql.connect()
-            cursor = conn.cursor(pymysql.cursors.DictCursor)		
+            cursor = conn.cursor(pymysql.cursors.DictCursor)	
+            _orignal_USR_json = json.dumps(_orignal_USR_json)
             sqlQuery = "INSERT INTO usr(author_id, discourse_id, sentence_id, orignal_USR_json, final_USR, USR_status) VALUES(%s, %s, %s, %s, %s, %s)"
             bindData = (_author_id, _discourse_id, _sentence_id, _orignal_USR_json, _final_USR, _USR_status)            
             conn = mysql.connect()
@@ -54,13 +58,14 @@ def USR():
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         cursor.execute("SELECT author_id, discourse_id, sentence_id, USR_ID, orignal_USR_json, final_USR, create_date, USR_status FROM usr")
         usrRows = cursor.fetchall()
+        usrRows = json.loads(usrRows)
         respone = jsonify(usrRows)
         respone.status_code = 200
         return respone
     except Exception as e:
         print(e)
     finally:
-        cursor.close() 
+        cursor.close()
         conn.close()  
 
 @app.route('/USR/<int:USR_ID>')
@@ -90,3 +95,4 @@ def showMessage(error=None):
     respone = jsonify(message)
     respone.status_code = 404
     return respone
+

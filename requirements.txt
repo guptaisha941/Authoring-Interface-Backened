@@ -1,3 +1,4 @@
 flask
 -U flask-cors
 flask-mysql
+wxconv
