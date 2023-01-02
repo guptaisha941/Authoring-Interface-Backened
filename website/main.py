@@ -2,6 +2,7 @@ from app import app
 from author import app
 from discourse import app
 from usr import app
+from admin import app
 import base64
 import requests
 

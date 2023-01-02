@@ -1,4 +1,4 @@
-mport pymysql
+import pymysql
 import json
 from app import app
 from author import app
